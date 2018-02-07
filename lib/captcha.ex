@@ -1,7 +1,6 @@
 defmodule Captcha do
-  def get() do
-    Port.open({:spawn, Path.join(Path.dirname(__ENV__.file), "../priv/captcha")}, [:binary])
-
+  def get(path\\Application.app_dir(Application.get_application(__MODULE__),"priv/captcha")) do
+    Port.open({:spawn, path}, [:binary])
     receive do
       {_, {:data, data}} ->
         <<text::bytes-size(5), img::binary>> = data
