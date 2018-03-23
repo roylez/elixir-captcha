@@ -27,11 +27,16 @@ If [available in Hex](https://hex.pm/docs/publish), the package can be installed
     ```
 ## Usage
 
-```elixir
-case Captcha.get() do
-  {:ok, text, img_binary } ->
-    # save text in session, then send img to client
-  {:timeout} ->
-    # log some error
-end
+Add this to your `router.ex`
+
+``` elixir
+get  "/captcha/:key", Captcha.Controller, :show
 ```
+
+And in your controller, use the following to verify 
+
+``` elixir
+# returns :ok | { :error, "invalid captcha" }
+Captcha.verify?(key, captcha)
+```
+
