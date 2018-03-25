@@ -38,7 +38,7 @@ defmodule Captcha.Cache do
   def handle_info(:timer, table) do
     cutoff = :os.system_time(:second) - @ttl
     :ets.select_delete(table, 
-                       [{{ :"_", {:"_", :"$1"} }, [{ :"<", :"$1", cutoff}], [:"$_"]}])
+                       [{{ :_, {:_, :"$1"}  }, [{:"<", :"$1", cutoff}], [true]}])
     Process.send_after(self(), :timer, 1000)
     { :noreply, table }
   end
