@@ -20,10 +20,10 @@ defmodule Captcha.Cache do
   # cache_key found
   def handle_call({:get, key}, _from, table) do
     case :ets.lookup(table, key) do
-      [ { ^key, { value, _expiry }} ] -> 
+      [ { ^key, { value, _expiry }} ] ->
         :ets.delete(table, key)
         { :reply, value, table }
-      _ -> 
+      _ ->
         { :reply, nil, table }
     end
   end
@@ -37,7 +37,7 @@ defmodule Captcha.Cache do
   # delete anything that was saved @ttl ago
   def handle_info(:timer, table) do
     cutoff = :os.system_time(:second) - @ttl
-    :ets.select_delete(table, 
+    :ets.select_delete(table,
                        [{{ :_, {:_, :"$1"}  }, [{:"<", :"$1", cutoff}], [true]}])
     Process.send_after(self(), :timer, 1000)
     { :noreply, table }
