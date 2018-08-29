@@ -6,17 +6,11 @@ defmodule Captcha do
   end
 
   # allow customize receive timeout, default: 10_000
-  def get(timeout \\ 1_000) do
-    port = Port.open({:spawn, Path.join(:code.priv_dir(:captcha), "captcha")}, [:binary])
+  def get() do
+    cmd = Path.join(:code.priv_dir(:captcha), "captcha")
+    { <<text::bytes-size(5), img::binary>>, _ } = System.cmd(cmd, [])
 
-    # Allow set receive timeout
-    receive do
-      {^port, {:data, data}} ->
-        <<text::bytes-size(5), img::binary>> = data
-        {:ok, text, img }
-    after timeout ->
-      {:timeout}
-    end
+    {:ok, text, img }
   end
 
   def verify?(key, value) do
