@@ -5,19 +5,23 @@ defmodule Captcha do
     Captcha.Cache.start_link()
   end
 
-  def get(path \\ Application.app_dir(Application.get_application(__MODULE__),"priv/captcha")) do
-    Port.open({:spawn, path}, [:binary])
+  # allow customize receive timeout, default: 10_000
+  def get(timeout \\ 1_000) do
+    Port.open({:spawn, Path.join(:code.priv_dir(:captcha), "captcha")}, [:binary])
+
+    # Allow set receive timeout
     receive do
       {_, {:data, data}} ->
         <<text::bytes-size(5), img::binary>> = data
         {:ok, text, img }
+
       other -> other
-    after
-      1_000 -> { :timeout }
+    after timeout ->
+      {:timeout}
     end
   end
 
-  def verify?(key, value) do 
+  def verify?(key, value) do
     case Captcha.Cache.get(key) do
       ^value -> :ok
       _ -> { :error, "invalid captcha" }
@@ -27,6 +31,6 @@ defmodule Captcha do
   def generate_and_cache(key) do
     { :ok, text, img } = get()
     Captcha.Cache.set(key, text)
-    img 
+    img
   end
 end
